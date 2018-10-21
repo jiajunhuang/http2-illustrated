@@ -151,7 +151,7 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (
     上面我们说到解析的时候，我们先读取9个字节，为什么是9个字节呢？从上面帧的格式我们可以看出来，因为24+8+8+1+31 = 72，
     而8个bit为一个byte（字节），所以是9个字节，也就是72bit。我们需要解释一下帧的格式定义中，各个块的意义。
 
-    - Length: 这里说明了帧的头的后边，`Frame Payload` 的长度，它是一个24bit长的unsigned int，单位是byte。也就是说，通常
+    - Length: 这里说明了帧的头的后边，`Frame Payload` 的长度，它是一个24bit长的unsigned int，单位是byte。因此，通常
     情况下，payload最多能传输2^14 (16,384)个byte，那如果想要传输更长怎么办呢？可以通过 `SETTINGS` 帧，传输一个叫做
     `SETTINGS_MAX_FRAME_SIZE` 的设置来改变。
     - Type: 这8个bit表示帧的类型，例如 `0000 0000` 表示这个帧是 `DATA`，而`0000 0001` 表示这个帧是 `HEADERS`等等。
