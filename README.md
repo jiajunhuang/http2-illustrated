@@ -299,7 +299,12 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (
     流程控制是指，`HTTP/2` 中，对流和其下方的TCP连接进行管理。进行管理的方式是发送类型为 `WINDOW_UPDATE` 的帧。
     流程控制是逐跳的，也就是说，如果有 `A-B-C` 三个参与方，流程控制只能是 `A-B`，`B-C` 之间各自有控制，B不能把A发送的
     `WINDOW_UPDATE` 帧转发到C。`WINDOW_UPDATE` 帧可以是针对流也可以是针对连接的，如果帧的头部里，StreamID是0，则是针对
-    连接的，否则，则是针对具体的流的。
+    连接的，否则，则是针对具体的流的。那么流程控制里设置的Window Size设置的是啥呢？
+
+    > Flow control only applies to frames that are identified as being subject to flow control.
+    > Of the frame types defined in this document, this includes only DATA frames.
+
+    如上，`WINDOW_UPDATE` 只能设置DATA这种帧的payload的大小。
 
 - 错误处理
     `HTTP/2` 中有两种类型的错误，一种是针对流的错误，一种是针对连接的错误。针对流的错误终止那个流的使用，针对连接的错误
