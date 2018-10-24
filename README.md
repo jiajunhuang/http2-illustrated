@@ -296,17 +296,69 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (
     其中B的权重是4，C的权重是8，那么当处理完A之后，B和C的资源分配比例是1:2。
 
 - flow control
+    流程控制是指，`HTTP/2` 中，对流和其下方的TCP连接进行管理。进行管理的方式是发送类型为 `WINDOW_UPDATE` 的帧。
+    流程控制是逐跳的，也就是说，如果有 `A-B-C` 三个参与方，流程控制只能是 `A-B`，`B-C` 之间各自有控制，B不能把A发送的
+    `WINDOW_UPDATE` 帧转发到C。`WINDOW_UPDATE` 帧可以是针对流也可以是针对连接的，如果帧的头部里，StreamID是0，则是针对
+    连接的，否则，则是针对具体的流的。
+
 - 错误处理
+    `HTTP/2` 中有两种类型的错误，一种是针对流的错误，一种是针对连接的错误。针对流的错误终止那个流的使用，针对连接的错误
+    终止整个TCP连接。
 
 ### 头部压缩
+
+TODO(还没细读 rfc7541)
 
 - 扩展：哈夫曼编码
 
 ### 约定的错误
 
+参考：https://tools.ietf.org/html/rfc7540#section-7
+
 ### `SETTINGS` 中可以设置的内容
 
+参考：https://tools.ietf.org/html/rfc7540#section-6.5.2
+
 ### 如何与 `HTTP/1.x` 兼容
+
+参考：https://tools.ietf.org/html/rfc7540#section-3
+
+首先，`HTTP/2` 共用 `http://` 和 `https://` 这两个scheme，也就是说，服务器和客户端要想办法从 `HTTP/1.x` 的连接升级到
+`HTTP/2` 的连接，大概的流程如下：
+
+客户端发送如下请求：
+
+```
+GET / HTTP/1.1
+Host: server.example.com
+Connection: Upgrade, HTTP2-Settings
+Upgrade: h2c
+HTTP2-Settings: <base64url encoding of HTTP/2 SETTINGS payload>
+```
+
+如果服务器不支持 `HTTP/2`，则如同往常一样返回，但是不会出现Upgrade这个头部，例如：
+
+```
+HTTP/1.1 200 OK
+Content-Length: 243
+Content-Type: text/html
+
+...
+```
+
+而如果服务器支持 `HTTP/2`，则返回101，带上Upgrade这个头部并且随即开始的内容就是 `HTTP/2` 的内容:
+
+```
+HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: h2c
+
+[ HTTP/2 connection ...
+```
+
+但是注意，上面所说的开始 `HTTP/2` 的内容，是这样的：客户端立即发送 Preface，服务器收到后，也发送Preface，然后就开始
+各自发送不同的帧。Preface的内容是固定的：`PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n`，其中客户端无需等待收到服务器发送的Preface，
+也就是说，客户端发送完Preface之后，就可以正常开始发送各种帧了。
 
 ## 参考
 
